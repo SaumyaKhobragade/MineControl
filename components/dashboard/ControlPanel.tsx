@@ -24,28 +24,28 @@ export function ControlPanel({
   const { ec2, minecraft } = status;
 
   return (
-    <Card className="bg-neutral-900/20 border-neutral-800 backdrop-blur-sm h-full flex flex-col justify-between">
-      <CardHeader>
-        <div className="flex items-center gap-2 text-neutral-400">
+    <Card className="bg-card/40 border-border backdrop-blur-md h-full flex flex-col justify-between rounded-xl">
+      <CardHeader className="pb-4">
+        <div className="flex items-center gap-2 text-muted-foreground">
           <Sliders className="w-4 h-4 text-emerald-400" />
-          <span className="text-xs font-bold uppercase tracking-wide">Operations</span>
+          <span className="text-xs font-semibold uppercase tracking-wider">Operations</span>
         </div>
-        <CardTitle className="text-lg">Server Controls</CardTitle>
-        <CardDescription>
+        <CardTitle className="text-xl font-semibold tracking-tight text-foreground">Server Controls</CardTitle>
+        <CardDescription className="text-xs text-muted-foreground/80 font-normal leading-relaxed">
           Trigger virtual machine actions and automation controls.
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="flex flex-col gap-6 pt-4">
+      <CardContent className="flex flex-col gap-6 pt-2 pb-6">
         {/* Dynamic status helper panel */}
-        <div className="p-4 rounded-xl bg-neutral-900/60 border border-neutral-850 flex items-center justify-between">
+        <div className="p-4 rounded-xl bg-neutral-100/50 dark:bg-neutral-950/40 border border-border flex items-center justify-between">
           <div className="flex flex-col gap-0.5">
-            <span className="text-[10px] uppercase font-bold text-neutral-500">Infrastructure state</span>
-            <span className="text-sm font-semibold text-neutral-300 capitalize">
+            <span className="text-[10px] uppercase font-semibold text-muted-foreground/60 tracking-wider">Infrastructure state</span>
+            <span className="text-sm font-semibold text-foreground/90 capitalize">
               EC2: {ec2.state} | MC: {minecraft.state}
             </span>
           </div>
-          <span className="text-xs text-neutral-500 font-mono hidden sm:inline">
+          <span className="text-xs text-muted-foreground/60 font-mono hidden sm:inline">
             Region: ap-south-1
           </span>
         </div>
@@ -56,7 +56,7 @@ export function ControlPanel({
           <Button
             onClick={onStart}
             disabled={ec2.state !== "stopped" || isRefreshing || operationType !== null}
-            className="h-11 bg-emerald-600 hover:bg-emerald-500 disabled:bg-neutral-800 disabled:text-neutral-500 transition-all font-semibold gap-2 rounded-lg cursor-pointer"
+            className="h-11 bg-emerald-600 hover:bg-emerald-500 text-white disabled:bg-neutral-200 dark:disabled:bg-neutral-800/80 disabled:text-neutral-400 dark:disabled:text-neutral-500 transition-all font-semibold gap-2 rounded-lg cursor-pointer"
           >
             {operationType === "starting" ? (
               <>
@@ -76,7 +76,7 @@ export function ControlPanel({
             onClick={onStop}
             disabled={ec2.state !== "running" || minecraft.state !== "online" || isRefreshing || operationType !== null}
             variant="destructive"
-            className="h-11 bg-rose-600/90 hover:bg-rose-500 disabled:bg-neutral-800 disabled:text-neutral-500 transition-all font-semibold gap-2 rounded-lg cursor-pointer"
+            className="h-11 bg-rose-600/90 hover:bg-rose-500 text-white disabled:bg-neutral-200 dark:disabled:bg-neutral-800/80 disabled:text-neutral-400 dark:disabled:text-neutral-500 transition-all font-semibold gap-2 rounded-lg cursor-pointer"
           >
             {operationType === "stopping" ? (
               <>
@@ -96,7 +96,7 @@ export function ControlPanel({
             onClick={onRefresh}
             disabled={isRefreshing || operationType !== null}
             variant="outline"
-            className="h-11 col-span-2 border-neutral-800 bg-neutral-900/50 hover:bg-neutral-800 text-neutral-300 hover:text-neutral-50 transition-all font-semibold gap-2 rounded-lg cursor-pointer"
+            className="h-11 col-span-2 border-border bg-card/50 hover:bg-accent text-foreground hover:text-accent-foreground transition-all font-semibold gap-2 rounded-lg cursor-pointer disabled:bg-neutral-200 dark:disabled:bg-neutral-800/80 disabled:text-neutral-400 dark:disabled:text-neutral-500"
           >
             <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} />
             Refresh Status

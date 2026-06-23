@@ -19,29 +19,29 @@ export function StatusCard({
   indicatorColor,
 }: StatusCardProps) {
   return (
-    <Card className="bg-neutral-900/30 border-neutral-800 backdrop-blur-sm hover:border-neutral-700 transition-all duration-300 group">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <span className="text-xs font-semibold tracking-wider text-neutral-400 uppercase">
+    <Card className="bg-card/40 border-border hover:border-neutral-400/30 dark:hover:border-neutral-700/50 backdrop-blur-md transition-all duration-300 group rounded-xl">
+      <CardHeader className="flex flex-row items-center justify-between pb-3">
+        <span className="text-xs font-medium tracking-wider text-muted-foreground uppercase">
           {title}
         </span>
         <div className="group-hover:scale-110 transition-transform duration-200">
           {icon}
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="flex flex-col gap-1">
+      <CardContent className="pb-5">
+        <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
             {indicatorColor && (
               <span
-                className={`w-2.5 h-2.5 rounded-full shadow-[0_0_8px_currentColor] animate-pulse ${indicatorColor}`}
+                className={`w-3 h-3 rounded-full shadow-[0_0_10px_currentColor] animate-pulse shrink-0 ${indicatorColor}`}
               />
             )}
-            <span className="text-2xl font-bold tracking-tight text-neutral-50 truncate">
+            <span className="text-3xl font-bold tracking-tight text-foreground tabular-nums truncate leading-none">
               {value}
             </span>
-            {badge && <div className="ml-1.5">{badge}</div>}
+            {badge && <div className="ml-1.5 shrink-0">{badge}</div>}
           </div>
-          <span className="text-xs text-neutral-500 font-medium truncate">
+          <span className="text-xs text-muted-foreground/80 font-normal leading-relaxed truncate">
             {description}
           </span>
         </div>

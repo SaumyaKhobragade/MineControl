@@ -31,10 +31,10 @@ export default function UnauthorizedPage() {
           <div className="mx-auto w-12 h-12 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center mb-4 shadow-[0_0_15px_rgba(244,63,94,0.15)]">
             <ShieldAlert className="w-6 h-6 animate-pulse" />
           </div>
-          <CardTitle className="text-2xl font-bold tracking-tight text-rose-400">
+          <CardTitle className="text-2xl font-semibold tracking-tight text-rose-400">
             Access Denied
           </CardTitle>
-          <CardDescription className="text-neutral-400 text-sm mt-1.5 font-medium">
+          <CardDescription className="text-neutral-400 text-sm mt-1.5 font-normal">
             You do not have access to this dashboard.
           </CardDescription>
         </CardHeader>
@@ -54,7 +54,7 @@ export default function UnauthorizedPage() {
               onClick={handleLogout}
               disabled={loading}
               variant="default"
-              className="w-full h-11 bg-rose-600/90 hover:bg-rose-600 text-white font-bold transition-all duration-200 gap-2.5 rounded-lg active:scale-[0.98]"
+              className="w-full h-11 bg-rose-600/90 hover:bg-rose-600 text-white font-semibold transition-all duration-200 gap-2.5 rounded-lg active:scale-[0.98]"
             >
               <LogOut className="w-4 h-4" />
               Logout

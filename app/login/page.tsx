@@ -30,10 +30,10 @@ export default function LoginPage() {
           <div className="mx-auto w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mb-4 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
             <Server className="w-6 h-6 animate-pulse" />
           </div>
-          <CardTitle className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-neutral-50 via-neutral-100 to-neutral-400 bg-clip-text text-transparent">
+          <CardTitle className="text-3xl font-semibold tracking-tight bg-gradient-to-r from-neutral-50 via-neutral-100 to-neutral-400 bg-clip-text text-transparent">
             MineControl
           </CardTitle>
-          <CardDescription className="text-neutral-400 text-sm mt-1.5 font-medium">
+          <CardDescription className="text-neutral-400 text-sm mt-1.5 font-normal">
             Manage your Minecraft server.
           </CardDescription>
         </CardHeader>
@@ -42,7 +42,7 @@ export default function LoginPage() {
           <Button
             onClick={handleLogin}
             disabled={loading}
-            className="w-full h-11 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-bold transition-all duration-200 gap-2.5 rounded-lg active:scale-[0.98] disabled:opacity-50"
+            className="w-full h-11 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-semibold transition-all duration-200 gap-2.5 rounded-lg active:scale-[0.98] disabled:opacity-50"
           >
             {loading ? (
               <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

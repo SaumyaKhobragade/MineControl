@@ -12,25 +12,25 @@ export function OverviewPanel({ status }: OverviewPanelProps) {
   const { ec2, minecraft } = status;
 
   return (
-    <Card className="bg-neutral-900/20 border-neutral-800 backdrop-blur-sm h-full flex flex-col justify-between">
+    <Card className="bg-card/40 border-border backdrop-blur-md h-full flex flex-col justify-between rounded-xl">
       <div>
-        <CardHeader>
-          <div className="flex items-center gap-2 text-neutral-400">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-2 text-muted-foreground">
             <Shield className="w-4 h-4 text-emerald-400" />
-            <span className="text-xs font-bold uppercase tracking-wide">Infrastructure</span>
+            <span className="text-xs font-semibold uppercase tracking-wider">Infrastructure</span>
           </div>
-          <CardTitle className="text-lg">Status Overview</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-xl font-semibold tracking-tight text-foreground">Status Overview</CardTitle>
+          <CardDescription className="text-xs text-muted-foreground/80 font-normal leading-relaxed">
             High-level configuration status values mapping.
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="flex flex-col gap-4 text-sm mt-2">
+        <CardContent className="flex flex-col gap-4 text-sm mt-2 pb-6">
           {/* EC2 Instance State */}
-          <div className="flex justify-between items-center py-2.5 border-b border-neutral-850">
-            <span className="text-neutral-400 font-medium">EC2 Instance</span>
+          <div className="flex justify-between items-center py-3 border-b border-border">
+            <span className="text-muted-foreground font-normal">EC2 Instance</span>
             <Badge
-              className={`capitalize border ${
+              className={`capitalize border font-medium ${
                 ec2.state === "running"
                   ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                   : ec2.state === "pending"
@@ -43,10 +43,10 @@ export function OverviewPanel({ status }: OverviewPanelProps) {
           </div>
 
           {/* Minecraft Server State */}
-          <div className="flex justify-between items-center py-2.5">
-            <span className="text-neutral-400 font-medium">Minecraft Server</span>
+          <div className="flex justify-between items-center py-3">
+            <span className="text-muted-foreground font-normal">Minecraft Server</span>
             <Badge
-              className={`capitalize border ${
+              className={`capitalize border font-medium ${
                 minecraft.state === "online"
                   ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                   : minecraft.state === "starting"

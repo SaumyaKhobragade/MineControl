@@ -59,11 +59,11 @@ export function DashboardGrid({ status }: DashboardGridProps) {
   };
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {/* Card 1: Server Status */}
       <StatusCard
         title="Server Status"
-        value={minecraft.state}
+        value={minecraft.state.toUpperCase()}
         description="Current game server loop state"
         icon={<Server className="w-5 h-5 text-emerald-400" />}
         badge={getMinecraftBadge()}
@@ -97,7 +97,7 @@ export function DashboardGrid({ status }: DashboardGridProps) {
       {/* Card 5: EC2 */}
       <StatusCard
         title="EC2 Instance"
-        value={ec2.state}
+        value={ec2.state.toUpperCase()}
         description="Underlying AWS virtual machine"
         icon={<Database className="w-5 h-5 text-cyan-400" />}
         badge={getEc2Badge()}

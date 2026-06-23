@@ -8,6 +8,7 @@ import { ControlPanel } from "@/components/dashboard/ControlPanel";
 import { OverviewPanel } from "@/components/dashboard/OverviewPanel";
 import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
 import { UserMenu } from "@/components/user-menu";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function Home() {
   const {
@@ -23,26 +24,27 @@ export default function Home() {
   } = useServerStatus();
 
   return (
-    <div className="flex-1 flex flex-col w-full min-h-screen bg-neutral-950 text-neutral-50 relative overflow-hidden">
+    <div className="flex-1 flex flex-col w-full min-h-screen bg-background text-foreground transition-colors duration-300 relative overflow-hidden">
       {/* Background gradients */}
-      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-emerald-500/10 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-blue-500/10 blur-[120px] pointer-events-none" />
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-emerald-500/10 dark:bg-emerald-500/10 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-blue-500/5 dark:bg-blue-500/10 blur-[120px] pointer-events-none" />
 
       {/* Navigation Header */}
-      <header className="border-b border-neutral-800 bg-neutral-950/80 backdrop-blur-md sticky top-0 z-40 px-6 py-4 flex items-center justify-between">
+      <header className="border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-40 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+          <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 dark:text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
             <Server className="w-6 h-6 animate-pulse" />
           </div>
           <div>
-            <h1 className="text-xl font-bold tracking-tight bg-gradient-to-r from-neutral-50 via-neutral-100 to-neutral-400 bg-clip-text text-transparent">
+            <h1 className="text-xl font-semibold tracking-tight text-foreground bg-gradient-to-r from-neutral-800 to-neutral-500 dark:from-neutral-50 dark:to-neutral-400 bg-clip-text">
               MineControl
             </h1>
-            <p className="text-xs text-neutral-500 font-medium">Minecraft Server Management Platform</p>
+            <p className="text-xs text-muted-foreground font-normal">Minecraft Server Management Platform</p>
           </div>
         </div>
 
         <div className="flex items-center gap-4">
+          <ThemeToggle />
           <UserMenu />
         </div>
       </header>
@@ -97,7 +99,7 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-neutral-900 bg-neutral-950/40 py-6 px-6 text-center text-xs text-neutral-600 relative z-10">
+      <footer className="border-t border-border bg-background/20 py-6 px-6 text-center text-xs text-muted-foreground relative z-10">
         <p>© 2026 MineControl Minecraft Platform. Production-Ready UI. All rights reserved.</p>
       </footer>
       {/* Floating toast notifications container */}
