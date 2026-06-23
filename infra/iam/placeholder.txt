@@ -1,1 +1,0 @@
-Placeholder for AWS IAM policies and roles infrastructure configuration.

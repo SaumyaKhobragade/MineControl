@@ -1,1 +1,0 @@
-Placeholder for AWS EventBridge infrastructure configuration.
