@@ -89,7 +89,7 @@ export function ControlPanel({
             disabled={ec2.state !== "stopped" || isRefreshing || operationType !== null}
             className="h-12 sm:h-12 bg-emerald-600 hover:bg-emerald-500 text-white disabled:bg-neutral-200 dark:disabled:bg-neutral-800/80 disabled:text-neutral-400 dark:disabled:text-neutral-500 transition-all font-semibold gap-2 rounded-lg cursor-pointer text-sm touch-manipulation"
           >
-            {operationType === "starting" ? "⏳ Starting..." : "🚀 Start Server"}
+            {operationType === "starting" ? "⏳ Starting..." : "Start Server"}
           </Button>
 
           {/* Stop Server */}
@@ -100,7 +100,7 @@ export function ControlPanel({
             variant="destructive"
             className="h-12 sm:h-12 bg-rose-600/90 hover:bg-rose-500 text-white disabled:bg-neutral-200 dark:disabled:bg-neutral-800/80 disabled:text-neutral-400 dark:disabled:text-neutral-500 transition-all font-semibold gap-2 rounded-lg cursor-pointer text-sm touch-manipulation"
           >
-            {operationType === "stopping" ? "⏳ Stopping..." : "🛑 Stop Server"}
+            {operationType === "stopping" ? "⏳ Stopping..." : "Stop Server"}
           </Button>
 
           {/* Refresh */}
@@ -117,7 +117,7 @@ export function ControlPanel({
                 Refreshing...
               </>
             ) : (
-              "🔄 Refresh Status"
+              "Refresh Status"
             )}
           </Button>
         </div>

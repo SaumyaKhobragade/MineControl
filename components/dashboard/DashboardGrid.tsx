@@ -33,13 +33,13 @@ export function DashboardGrid({ status }: DashboardGridProps) {
   const getMinecraftStateDisplay = () => {
     switch (minecraft.state) {
       case "online":
-        return "🟢 ONLINE";
+        return "ONLINE";
       case "starting":
-        return "🟡 STARTING";
+        return "STARTING";
       case "stopping":
-        return "🟠 STOPPING";
+        return "STOPPING";
       default:
-        return "🔴 OFFLINE";
+        return "OFFLINE";
     }
   };
 
