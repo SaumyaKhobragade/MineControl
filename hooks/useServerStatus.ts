@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import useSWR from "swr";
 import { ServerStatus } from "@/types";
 
@@ -18,12 +18,73 @@ export interface ToastItem {
 
 export function useServerStatus() {
   const [operationType, setOperationType] = useState<"starting" | "stopping" | null>(null);
+  const [operationStep, setOperationStep] = useState<string>("");
   const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [tabVisible, setTabVisible] = useState(true);
+
+  // Smart refresh: pause when tab is hidden
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      setTabVisible(!document.hidden);
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, []);
 
   const { data, error, isLoading, mutate } = useSWR<ServerStatus>("/api/status", fetcher, {
-    refreshInterval: 10000,
+    refreshInterval: tabVisible ? 30000 : 0,
     revalidateOnFocus: true,
+    revalidateOnReconnect: true,
+    onSuccess: () => setLastUpdated(new Date()),
   });
+
+  // Operation step sequencing
+  useEffect(() => {
+    let timers: NodeJS.Timeout[] = [];
+
+    if (operationType === "starting") {
+      setOperationStep("⏳ Starting EC2...");
+
+      timers.push(
+        setTimeout(() => {
+          setOperationStep("⏳ Waiting for AWS...");
+        }, 5000)
+      );
+
+      timers.push(
+        setTimeout(() => {
+          setOperationStep("⏳ Starting Minecraft...");
+        }, 12000)
+      );
+
+      timers.push(
+        setTimeout(() => {
+          setOperationStep("⏳ Waiting for startup confirmation...");
+        }, 22000)
+      );
+    } else if (operationType === "stopping") {
+      setOperationStep("⏳ Sending stop command...");
+
+      timers.push(
+        setTimeout(() => {
+          setOperationStep("⏳ Saving world data...");
+        }, 4000)
+      );
+
+      timers.push(
+        setTimeout(() => {
+          setOperationStep("⏳ Stopping EC2...");
+        }, 9000)
+      );
+    } else {
+      setOperationStep("");
+    }
+
+    return () => {
+      timers.forEach((t) => clearTimeout(t));
+    };
+  }, [operationType]);
 
   const addToast = (message: string, type: "success" | "error" | "info" | "warning") => {
     const id = Math.random().toString(36).substring(2, 9);
@@ -37,9 +98,9 @@ export function useServerStatus() {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  const refresh = () => {
-    mutate();
-  };
+  const refresh = useCallback(() => {
+    mutate().then(() => setLastUpdated(new Date()));
+  }, [mutate]);
 
   const startServer = async () => {
     if (operationType) return;
@@ -51,9 +112,9 @@ export function useServerStatus() {
       }
       const result = await res.json();
       if (result.status === "online") {
-        addToast("Server started successfully.", "success");
+        addToast("✅ Server started successfully", "success");
       } else if (result.status === "minecraft_restarted") {
-        addToast("Minecraft server recovered successfully.", "success");
+        addToast("✅ Server started successfully", "success");
       } else if (result.status === "already_running") {
         addToast("Server is already running.", "info");
       } else if (result.status === "already_starting") {
@@ -68,7 +129,7 @@ export function useServerStatus() {
       addToast("Failed to start server.", "error");
     } finally {
       setOperationType(null);
-      mutate();
+      mutate().then(() => setLastUpdated(new Date()));
     }
   };
 
@@ -82,7 +143,7 @@ export function useServerStatus() {
       }
       const result = await res.json();
       if (result.status === "stopped") {
-        addToast("Server stopped successfully.", "success");
+        addToast("🛑 Server stopped successfully", "success");
       } else if (result.status === "already_off") {
         addToast("Server is already stopped.", "info");
       } else if (result.status === "startup_in_progress") {
@@ -97,7 +158,7 @@ export function useServerStatus() {
       addToast("Failed to stop server.", "error");
     } finally {
       setOperationType(null);
-      mutate();
+      mutate().then(() => setLastUpdated(new Date()));
     }
   };
 
@@ -106,6 +167,8 @@ export function useServerStatus() {
     isLoading: isLoading && !data,
     isOperating: operationType !== null,
     operationType,
+    operationStep,
+    lastUpdated,
     error: error ? "Unable to retrieve server status." : null,
     toasts,
     removeToast,

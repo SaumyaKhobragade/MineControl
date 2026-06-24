@@ -24,11 +24,11 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className="h-full antialiased"
+      className="antialiased"
       suppressHydrationWarning
     >
       <body
-        className={`${inter.variable} min-h-full bg-neutral-950 text-neutral-50 flex flex-col font-sans`}
+        className={`${inter.variable} flex flex-col font-sans`}
       >
         <SessionProvider>
           <ThemeProvider

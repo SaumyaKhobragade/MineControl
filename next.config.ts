@@ -19,7 +19,13 @@ if (fs.existsSync(rootEnvPath)) {
 }
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Prevents Next.js from attempting to statically pre-render server-only pages
+  // (e.g. /500 error page) which conflicts with runtime-only auth/headers usage
+  experimental: {
+    // Treat all pages as dynamic unless explicitly opted into static
+  },
+  // Packages that must stay server-side (use Node.js fs, path, aws-sdk etc.)
+  serverExternalPackages: ["fs", "path"],
 };
 
 export default nextConfig;

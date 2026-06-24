@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import { loadConfig } from "@/lib/config";
+import { requireEnv, optionalEnv } from "@/lib/env";
 import {
   getInstanceStatus,
   startInstance,
@@ -11,35 +12,46 @@ import {
   getMinecraftInfo
 } from "@/lib/aws";
 import { operationLock } from "@/lib/operation-lock";
+import {
+  logStartRequested,
+  logStartSuccess,
+  logStartFailed,
+  logAwsError,
+} from "@/lib/discord/webhook";
 
 export const dynamic = "force-dynamic";
 
 export async function POST() {
-  // 1. Session authorization verify
+  // 1. Session authorization
   const session = await auth();
   if (!session || !session.user?.isAuthorized) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
-  // 2. Concurrency operation lock check
+  // 2. Concurrency lock
   const lock = operationLock.get();
   if (lock === "starting") {
-    return NextResponse.json({ status: "already_starting" });
+    return NextResponse.json({ success: false, status: "already_starting", message: "Server startup is already in progress." });
   }
   if (lock === "stopping") {
-    return NextResponse.json({ status: "shutdown_in_progress" });
+    return NextResponse.json({ success: false, status: "shutdown_in_progress", message: "Cannot start: shutdown is in progress." });
   }
 
-  const rawInstanceId = process.env.INSTANCE_ID || "";
-  const instanceId = rawInstanceId.replace(/^['"]|['"]$/g, "");
-  if (!instanceId) {
-    return NextResponse.json({ status: "failed", message: "INSTANCE_ID environment variable is missing" });
+  let instanceId: string;
+  try {
+    instanceId = requireEnv("INSTANCE_ID");
+  } catch (e) {
+    const err = e as Error;
+    console.error("[api/start]", err.message);
+    return NextResponse.json({ success: false, error: "Server configuration error." }, { status: 500 });
   }
 
+  const region = optionalEnv("AWS_REGION", "ap-south-1");
   const config = loadConfig();
   const serverAddress = config.minecraft.server_address;
+  const username = session.user?.name || session.user?.email || "Unknown User";
 
-  // 3. Query current status
+  // 3. Pre-flight status check
   let ec2Info;
   let minecraftInfo;
   try {
@@ -51,80 +63,64 @@ export async function POST() {
     minecraftInfo = statusResult[1];
   } catch (error) {
     const err = error as Error;
-    console.error("[START] Failed pre-flight status check:", err.message, err);
-    return NextResponse.json({ status: "failed", message: `Failed pre-flight status check: ${err.message}` });
+    console.error("[api/start] Pre-flight check failed:", err.message);
+    logAwsError("Pre-flight status check", err.message);
+    return NextResponse.json({ success: false, error: "Failed to query AWS instance status." }, { status: 503 });
   }
 
-  // 4. Implement Decision Matrix
+  // 4. Decision matrix
   if (ec2Info.state === "running") {
     if (minecraftInfo.online) {
-      console.log("[START] Server already running and online.");
-      return NextResponse.json({ status: "already_running" });
+      return NextResponse.json({ success: true, status: "already_running", message: "Server is already running." });
     }
 
-    // EC2 is running but Minecraft is offline: Trigger recovery flow
+    // EC2 running but Minecraft offline: recovery flow
     operationLock.set("starting");
+    logStartRequested(username, instanceId, region);
     try {
-      console.log("[RECOVERY] EC2 already running");
-      console.log("[RECOVERY] Minecraft offline");
-
-      console.log("[RECOVERY] Waiting for SSM");
-      const ssmWaitSeconds = config.timeouts.ssm_wait_seconds || 60;
-      try {
-        await waitForSSM(instanceId, ssmWaitSeconds * 1000, 5000);
-      } catch (ssmError) {
-        const ssmErr = ssmError as Error;
-        console.error("[RECOVERY] SSM unavailable:", ssmErr.message);
-        return NextResponse.json({ status: "failed", message: "SSM unavailable" });
-      }
-
-      console.log("[RECOVERY] Executing start.sh");
-      await startMinecraft(instanceId);
-
-      console.log("[START] Waiting for Minecraft");
-      const startupWaitSeconds = config.timeouts.startup_wait_seconds || 300;
-      await waitForMinecraftOnline(serverAddress, startupWaitSeconds * 1000, 5000);
-
-      console.log("[RECOVERY] Minecraft recovered");
-      return NextResponse.json({ status: "minecraft_restarted" });
-    } catch (error) {
-      const err = error as Error;
-      console.error("[RECOVERY] Failed to recover Minecraft:", err.message, err);
-      return NextResponse.json({ status: "failed", message: err.message });
-    } finally {
-      operationLock.set("idle");
-    }
-  } else {
-    // EC2 is off (or not running) -> Run full startup sequence
-    operationLock.set("starting");
-    try {
-      console.log("[START] Starting EC2");
-      if (ec2Info.state === "stopped") {
-        await startInstance(instanceId);
-      }
-
-      console.log("[START] Waiting for instance");
-      await waitForInstanceRunning(instanceId, 300000, 5000);
-
-      console.log("[START] Waiting for SSM");
       const ssmWaitSeconds = config.timeouts.ssm_wait_seconds || 60;
       await waitForSSM(instanceId, ssmWaitSeconds * 1000, 5000);
-
-      console.log("[START] Executing start.sh");
       await startMinecraft(instanceId);
 
-      console.log("[START] Waiting for Minecraft");
       const startupWaitSeconds = config.timeouts.startup_wait_seconds || 300;
       await waitForMinecraftOnline(serverAddress, startupWaitSeconds * 1000, 5000);
 
-      console.log("[START] Startup complete");
-      return NextResponse.json({ status: "online" });
+      logStartSuccess("running", "online");
+      return NextResponse.json({ success: true, status: "minecraft_restarted", message: "Minecraft server restarted successfully." });
     } catch (error) {
       const err = error as Error;
-      console.error("[START] Failed to start server:", err.message, err);
-      return NextResponse.json({ status: "failed", message: err.message });
+      console.error("[api/start] Recovery failed:", err.message);
+      logStartFailed(err.message);
+      return NextResponse.json({ success: false, status: "failed", error: "Failed to recover Minecraft server." }, { status: 500 });
     } finally {
       operationLock.set("idle");
     }
+  }
+
+  // EC2 is stopped: full startup sequence
+  operationLock.set("starting");
+  logStartRequested(username, instanceId, region);
+  try {
+    if (ec2Info.state === "stopped") {
+      await startInstance(instanceId);
+    }
+    await waitForInstanceRunning(instanceId, 300000, 5000);
+
+    const ssmWaitSeconds = config.timeouts.ssm_wait_seconds || 60;
+    await waitForSSM(instanceId, ssmWaitSeconds * 1000, 5000);
+    await startMinecraft(instanceId);
+
+    const startupWaitSeconds = config.timeouts.startup_wait_seconds || 300;
+    await waitForMinecraftOnline(serverAddress, startupWaitSeconds * 1000, 5000);
+
+    logStartSuccess("running", "online");
+    return NextResponse.json({ success: true, status: "online", message: "Server started successfully." });
+  } catch (error) {
+    const err = error as Error;
+    console.error("[api/start] Startup failed:", err.message);
+    logStartFailed(err.message);
+    return NextResponse.json({ success: false, status: "failed", error: "Failed to start server." }, { status: 500 });
+  } finally {
+    operationLock.set("idle");
   }
 }

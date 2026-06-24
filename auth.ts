@@ -55,6 +55,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
+    async signIn({ profile }) {
+      // Fire-and-forget audit log on every successful OAuth login
+      if (profile && "username" in profile) {
+        try {
+          const { logUserLogin } = await import("@/lib/discord/webhook");
+          logUserLogin((profile as { username?: string }).username || profile.name || "Unknown");
+        } catch {
+          // Never block login
+        }
+      }
+      return true;
+    },
     async jwt({ token, profile }) {
       if (profile && "id" in profile) {
         token.discordId = profile.id as string;

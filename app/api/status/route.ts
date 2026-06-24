@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import { loadConfig } from "@/lib/config";
+import { requireEnv } from "@/lib/env";
 import {
   getInstanceStatus,
   getMinecraftInfo
@@ -12,33 +13,26 @@ import { operationLock } from "@/lib/operation-lock";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  // 1. Session authorization verify
+  // 1. Session authorization
   const session = await auth();
   if (!session || !session.user?.isAuthorized) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    // 2. Read parameters
-    const rawInstanceId = process.env.INSTANCE_ID || "";
-    const instanceId = rawInstanceId.replace(/^['"]|['"]$/g, "");
-    if (!instanceId) {
-      throw new Error("INSTANCE_ID environment variable is missing.");
-    }
-
+    const instanceId = requireEnv("INSTANCE_ID");
     const config = loadConfig();
     const serverAddress = config.minecraft.server_address;
 
-    // 3. Parallel fetching of status metrics
+    // 2. Parallel status queries
     const [ec2Info, minecraftInfo] = await Promise.all([
       getInstanceStatus(instanceId),
       getMinecraftInfo(serverAddress, 4000),
     ]);
 
-    // 4. Compute formatted uptime and map status object
+    // 3. Compute uptime and state
     const uptime = ec2Info.state === "running" ? formatUptime(ec2Info.launchTime) : "0m";
 
-    // Map minecraft status state
     const lock = operationLock.get();
     let minecraftState: "online" | "offline" | "starting" | "stopping" = "offline";
     if (lock === "starting") {
@@ -62,17 +56,14 @@ export async function GET() {
       },
     };
 
-    // 5. Strict schema validation
     const validated = ServerStatusSchema.parse(statusData);
-
     return NextResponse.json(validated);
   } catch (error) {
     const err = error as Error;
-    console.error("[api/status] Error retrieving status metrics:", err.message, err);
+    console.error("[api/status] Error:", err.message);
     return NextResponse.json(
-      { error: "Failed to retrieve status" },
+      { success: false, error: "Failed to retrieve server status" },
       { status: 500 }
     );
   }
 }
-
