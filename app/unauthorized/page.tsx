@@ -43,6 +43,9 @@ export default function UnauthorizedPage() {
           {session?.user && (
             <div className="p-3.5 rounded-lg bg-black/30 border border-neutral-850 text-xs text-neutral-400 font-mono space-y-1">
               <p>Logged in as: <span className="text-neutral-200 font-semibold">{session.user.name || session.user.email}</span></p>
+              {session.user.email && (
+                <p>Email: <span className="text-neutral-300">{session.user.email}</span></p>
+              )}
               {session.user.discordId && (
                 <p>Discord ID: <span className="text-neutral-300">{session.user.discordId}</span></p>
               )}
@@ -73,7 +76,7 @@ export default function UnauthorizedPage() {
         </CardContent>
 
         <CardFooter className="border-t border-neutral-900 bg-black/20 p-4 text-center text-xs text-neutral-500 rounded-b-xl flex items-center justify-center">
-          Contact system admin to authorize your Discord ID.
+          Contact system admin to authorize your account.
         </CardFooter>
       </Card>
     </div>

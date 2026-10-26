@@ -62,6 +62,11 @@ export function UserMenu() {
           <div className="px-4 py-2 border-b border-border flex flex-col gap-0.5">
             <span className="text-xs text-muted-foreground/60 uppercase tracking-wider font-semibold">Logged In As</span>
             <span className="text-sm font-semibold text-foreground truncate">{name}</span>
+            {session.user.email && session.user.name && (
+              <span className="text-[10px] text-muted-foreground/80 font-mono mt-0.5 truncate">
+                {session.user.email}
+              </span>
+            )}
             {session.user.discordId && (
               <span className="text-[10px] text-muted-foreground/80 font-mono mt-0.5 truncate">
                 ID: {session.user.discordId}

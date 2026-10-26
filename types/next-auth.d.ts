@@ -5,12 +5,14 @@ declare module "next-auth" {
     user: {
       discordId?: string;
       isAuthorized?: boolean;
+      provider?: string;
     } & DefaultSession["user"];
   }
 
   interface User {
     discordId?: string;
     isAuthorized?: boolean;
+    provider?: string;
   }
 }
 
@@ -18,5 +20,6 @@ declare module "next-auth/jwt" {
   interface JWT {
     discordId?: string;
     isAuthorized?: boolean;
+    provider?: string;
   }
 }

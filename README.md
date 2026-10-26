@@ -57,13 +57,27 @@ Open [http://localhost:3000](http://localhost:3000).
 | `AWS_SECRET_ACCESS_KEY` | ✅ | IAM secret key |
 | `INSTANCE_ID` | ✅ | EC2 instance ID (e.g. `i-0abc123def456`) |
 | `AWS_REGION` | ✅ | AWS region (e.g. `ap-south-1`) |
-| `DISCORD_CLIENT_ID` | ✅ | Discord OAuth application client ID |
-| `DISCORD_CLIENT_SECRET` | ✅ | Discord OAuth application client secret |
+| `DISCORD_CLIENT_ID` | ⚪ | Discord OAuth application client ID |
+| `DISCORD_CLIENT_SECRET` | ⚪ | Discord OAuth application client secret |
+| `GOOGLE_CLIENT_ID` | ⚪ | Google OAuth client ID |
+| `GOOGLE_CLIENT_SECRET` | ⚪ | Google OAuth client secret |
+| `ALLOWED_GOOGLE_EMAIL` | ⚪ | Allowed Google email (defaults to `khobragadesaumya@gmail.com`) |
 | `NEXTAUTH_SECRET` | ✅ | Random secret — generate with `openssl rand -base64 32` |
 | `NEXTAUTH_URL` | ✅ | Full URL of the deployment (e.g. `https://your-app.vercel.app`) |
 | `DISCORD_WEBHOOK_URL` | ✅ | Discord webhook for audit logs |
 
 > **Security**: Never commit `.env` to version control. It is listed in `.gitignore`.
+
+---
+
+## Google OAuth Setup
+
+1. Go to [Google Cloud Console Credentials](https://console.cloud.google.com/apis/credentials)
+2. Create **OAuth 2.0 Client ID** (Web Application)
+3. Add Authorized redirect URI:
+   - Local: `http://localhost:3000/api/auth/callback/google`
+   - Production: `https://your-app.vercel.app/api/auth/callback/google`
+4. Copy **Client ID** and **Client Secret** to `.env` as `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`
 
 ---
 
@@ -81,13 +95,16 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## User Allowlist
 
-Edit `config.json` to add authorized Discord user IDs:
+Edit `config.json` to configure authorized Discord IDs and Google emails:
 
 ```json
 {
   "permissions": {
     "authorized_users": [
       "123456789012345678"
+    ],
+    "authorized_emails": [
+      "khobragadesaumya@gmail.com"
     ]
   }
 }

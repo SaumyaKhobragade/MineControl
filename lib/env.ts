@@ -21,7 +21,11 @@ const REQUIRED_ENV_VARS = [
   "DISCORD_WEBHOOK_URL",
 ] as const;
 
-const OPTIONAL_ENV_VARS = [] as const;
+const OPTIONAL_ENV_VARS = [
+  "GOOGLE_CLIENT_ID",
+  "GOOGLE_CLIENT_SECRET",
+  "ALLOWED_GOOGLE_EMAIL",
+] as const;
 
 export interface EnvValidationResult {
   valid: boolean;

@@ -22,6 +22,7 @@ export const ConfigSchema = z.object({
   }),
   permissions: z.object({
     authorized_users: z.array(IdCoerceSchema),
+    authorized_emails: z.array(z.string()).optional().default([]),
   }),
   timeouts: z.object({
     startup_wait_seconds: z.number().int().positive(),
